@@ -1,0 +1,55 @@
+package analizadores;
+import java.util.LinkedList;
+import java_cup.runtime.*;
+import tarea45.*;
+
+parser code
+{:
+    public Nodo1 raiz;
+
+    /**
+    * Metodo para error sintactico
+    **/
+    public void syntax_error(Symbol s){
+        System.err.println("Error sintacto línea " + (s.left+1) +" columna "+(s.right+1)+ ". No se esperaba " +s.value+"."); 
+            tarea45.main.listaSintacticos.add(new ErrorLexico(String.valueOf(s.value), "Sintactico", Integer.toString(s.left +1), Integer.toString(s.right+1)));
+        }
+    
+    public void unrecovered_syntax_error(Symbol s) throws java.lang.Exception{
+        System.err.println("Error irrecuperable en la linea " + (s.left)+ " columna " +s.right+". Elemento " + s.value + " no reconocido.");
+        
+    }
+
+:}
+
+terminal String coma, par, impar;
+
+non terminal Nodo1 S, LISTA;
+
+start with S; 
+S       ::=     LISTA:l{:raiz = l;:}
+        ;
+
+LISTA   ::=     LISTA:l coma par:p
+                {:
+                    l.valor += Integer.parseInt(p);
+                    if(l.paridad){
+                        l.paridad = true;
+                    }else{
+                        l.paridad = false;
+                    }
+                    RESULT = l;
+                :}
+                | LISTA:l coma impar:p 
+                {:
+                    l.valor += Integer.parseInt(p);
+                    if(l.paridad){
+                        l.paridad = false;
+                    }else{
+                        l.paridad = true;
+                    }
+                    RESULT = l;
+                :}
+                | par:p {:RESULT = new Nodo1(true, Integer.parseInt(p));:}
+                | impar:p {:RESULT = new Nodo1(false, Integer.parseInt(p));:}
+        ;
